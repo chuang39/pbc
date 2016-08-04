@@ -362,6 +362,10 @@ local _encode_type_meta = {}
 
 function _encode_type_meta:__index(key)
 	local t, msg = c._env_type(P, self._CType, key)
+        if key == 'billing_id' or key == 'deal_id' then
+            t = 7
+        end
+
 	local func = assert(_writer[t],key)(msg)
 	self[key] = func
 	return func

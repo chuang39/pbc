@@ -76,9 +76,53 @@ call_type(pbc_decoder pd, void * ud, struct _field *f, struct atom *a, uint8_t *
 		break;
 	case PTYPE_INT64:
 	case PTYPE_UINT64:
-		CHECK_VARINT(a, -1);
-		v.i.low = a->v.i.low;
-		v.i.hi = a->v.i.hi;
+		//CHECK_LEND(a, -1);
+		//v.s.buffer = start + a->v.s.start;
+		//v.s.len = a->v.s.end - a->v.s.start;
+                if (!strcmp(f->name, "billing_id") || !strcmp(f->name, "val64")) {
+                    CHECK_VARINT(a, -1);
+		    int64_t num =( (((uint64_t)a->v.i.hi)) << 32) + (uint64_t)a->v.i.low;
+                    char temp[8];
+                    temp[0] = (num >> 0) & 0xff;
+                    temp[1] = (num >> 8) & 0xff;
+                    temp[2] = (num >> 16) & 0xff;
+                    temp[3] = (num >> 24) & 0xff;
+                    temp[4] = (num >> 32) & 0xff;
+                    temp[5] = (num >> 40) & 0xff;
+                    temp[6] = (num >> 48) & 0xff;
+                    temp[7] = (num >> 56) & 0xff;
+
+                    char ret[10];
+                    sprintf(ret, "%c%c%c%c%c%c%c%c", temp[0],temp[1],temp[2],temp[3],temp[4],temp[5],temp[6],temp[7]);
+		    v.s.buffer = ret;
+		    v.s.len = 8;
+                } else if (!strcmp(f->name, "direct_deal_id")) {
+                    CHECK_VARINT(a, -1);
+		    int64_t num =( (((uint64_t)a->v.i.hi)) << 32) + (uint64_t)a->v.i.low;
+                    char temp[8];
+                    temp[0] = (num >> 0) & 0xff;
+                    temp[1] = (num >> 8) & 0xff;
+                    temp[2] = (num >> 16) & 0xff;
+                    temp[3] = (num >> 24) & 0xff;
+                    temp[4] = (num >> 32) & 0xff;
+                    temp[5] = (num >> 40) & 0xff;
+                    temp[6] = (num >> 48) & 0xff;
+                    temp[7] = (num >> 56) & 0xff;
+
+                    char ret[80];
+                    sprintf(ret, "%ld", num);
+                    int idx = 0;
+                    for (idx = 0; idx < 50; idx++) {
+                        if (ret[idx] == '\0') break;
+                    }
+                    sprintf(ret, "%ld_%c%c%c%c%c%c%c%c", num, temp[0],temp[1],temp[2],temp[3],temp[4],temp[5],temp[6],temp[7]);
+		    v.s.buffer = ret;
+		    v.s.len = idx+9;
+                } else {
+                    CHECK_VARINT(a, -1);
+		    v.i.low = a->v.i.low;
+		    v.i.hi = a->v.i.hi;
+                }
 		break;
 	case PTYPE_FIXED64:
 	case PTYPE_SFIXED64:
@@ -122,7 +166,14 @@ call_type(pbc_decoder pd, void * ud, struct _field *f, struct atom *a, uint8_t *
 		assert(0);
 		break;
 	}
-	pd(ud, type, type_name, &v, f->id, f->name);
+
+        if (!strcmp(f->name, "billing_id")) {
+	    pd(ud, 133, "string", &v, f->id, f->name);
+        } else if (strcmp(f->name, "direct_deal_id")) {
+	    pd(ud, 5, "string", &v, f->id, f->name);
+        } else {
+	    pd(ud, type, type_name, &v, f->id, f->name);
+        }
 	return 0;
 }
 

@@ -70,6 +70,7 @@ _env_register(lua_State *L) {
 	struct pbc_env * env = (struct pbc_env *)checkuserdata(L,1);
 	size_t sz = 0;
 	const char * buffer = luaL_checklstring(L, 2 , &sz);
+
 	struct pbc_slice slice;
 	slice.buffer = (void *)buffer;
 	slice.len = (int)sz;
