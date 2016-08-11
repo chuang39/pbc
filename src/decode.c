@@ -169,7 +169,7 @@ call_type(pbc_decoder pd, void * ud, struct _field *f, struct atom *a, uint8_t *
 
         if (!strcmp(f->name, "billing_id")) {
 	    pd(ud, 133, "string", &v, f->id, f->name);
-        } else if (strcmp(f->name, "direct_deal_id")) {
+        } else if (!strcmp(f->name, "direct_deal_id")) {
 	    pd(ud, 5, "string", &v, f->id, f->name);
         } else {
 	    pd(ud, type, type_name, &v, f->id, f->name);
